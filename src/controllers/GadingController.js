@@ -1,5 +1,5 @@
 import axios from "axios";
-import { connectionKemiling } from "../config/Database.js";
+import { connectionGading } from "../config/Database.js";
 import {
   filterPendapatanBulanan,
   getCurrentDateArray,
@@ -53,16 +53,16 @@ export const getPendapatan = async (req, res) => {
       AND division IN ('1');`;
 
   try {
-    const [resultPendapatanBarangKlinik] = await connectionKemiling.query(
+    const [resultPendapatanBarangKlinik] = await connectionGading.query(
       queryGetPendapatanBarangKlinik
     );
-    const [resultPendapatanJasaKlinik] = await connectionKemiling.query(
+    const [resultPendapatanJasaKlinik] = await connectionGading.query(
       queryGetPendapatanJasaKlinik
     );
-    const [resultPendapatanBarangLab] = await connectionKemiling.query(
+    const [resultPendapatanBarangLab] = await connectionGading.query(
       queryGetPendapatanBarangLab
     );
-    const [resultPendapatanJasaLab] = await connectionKemiling.query(
+    const [resultPendapatanJasaLab] = await connectionGading.query(
       queryGetPendapatanJasaLab
     );
 
@@ -169,13 +169,10 @@ export const storeBulanan = async (req, res) => {
 
 export const updateBulanan = async (req, res) => {
   try {
-    res.json({
-      status: "Success",
-    });
+    console.log("Hello");
+    res.json("BErhasil");
   } catch (error) {
-    res.json({
-      status: "Error",
-    });
+    res.json(error.message);
   }
 };
 
@@ -232,7 +229,7 @@ export const storeHarian = async (req, res) => {
           "Content-Type": "application/json",
         },
         data: {
-          Id: `Penjualan Harian Kemiling`,
+          Id: `Penjualan Harian Gading`,
           "Id Cabang": cabangId,
           "Id Penjualan Bulanan": idPenjualanBulanan[index],
           "Dari Tanggal": "2024-07-24",
@@ -254,3 +251,30 @@ export const storeHarian = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const run = async (req, res) => {
+  try {
+    const response = await fetch(
+      `http://localhost:${port}/gading/pendapatan/bulanan`
+    );
+    const dataResponse = await response.json();
+
+    if (Array.isArray(dataResponse) && dataResponse.length === 0) {
+      await fetch(`http://localhost:${port}/gading/pendapatan/bulanan/store`);
+    }
+
+    await fetch(`http://localhost:${port}/gading/pendapatan/harian/store`);
+
+    await fetch(`http://localhost:${port}/gading/pendapatan/bulanan/update`);
+
+    res.json("Berhasil");
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+// NB:
+/*
+Tolong perbaiki penjumlahannya, untuk logic alurnya sudah berhasil sih, jadi ga ada kendala
+yang kendala cuman waktu aja sih, huftt
+*/
