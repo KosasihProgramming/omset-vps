@@ -8,11 +8,11 @@ import {
 
 const port = 5555;
 const token = "wFcCXiNy1euYho73dBGwkPhjjTdODzv6";
-const namaKlinik = "Klinik Pratama Kosasih Kemiling";
-const namaLab = "Laboratorium Kosasih Kemiling";
+const namaKlinik = "Klinik Kosasih Rawat Inap Sumber Waras";
+const namaLab = "Laboratorium Sumber Waras";
 const bulan = getCurrentDateArray("bulan");
 const tahun = getCurrentDateArray("tahun");
-const idCabang = [1, 2];
+const idCabang = [6, 5];
 
 export const getPendapatan = async (req, res) => {
   const idPendapatanBarangKlinik = 401.001;
@@ -169,10 +169,13 @@ export const storeBulanan = async (req, res) => {
 
 export const updateBulanan = async (req, res) => {
   try {
-    console.log("Hello");
-    res.json("BErhasil");
+    res.json({
+      status: "Success",
+    });
   } catch (error) {
-    res.json(error.message);
+    res.json({
+      status: "Error",
+    });
   }
 };
 
@@ -251,30 +254,3 @@ export const storeHarian = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-export const run = async (req, res) => {
-  try {
-    const response = await fetch(
-      `http://localhost:${port}/kemiling/pendapatan/bulanan`
-    );
-    const dataResponse = await response.json();
-
-    if (Array.isArray(dataResponse) && dataResponse.length === 0) {
-      await fetch(`http://localhost:${port}/kemiling/pendapatan/bulanan/store`);
-    }
-
-    await fetch(`http://localhost:${port}/kemiling/pendapatan/harian/store`);
-
-    await fetch(`http://localhost:${port}/kemiling/pendapatan/bulanan/update`);
-
-    res.json("Berhasil");
-  } catch (error) {
-    res.json(error.message);
-  }
-};
-
-// NB:
-/*
-Tolong perbaiki penjumlahannya, untuk logic alurnya sudah berhasil sih, jadi ga ada kendala
-yang kendala cuman waktu aja sih, huftt
-*/
