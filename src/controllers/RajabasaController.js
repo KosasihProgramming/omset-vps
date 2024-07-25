@@ -1,5 +1,5 @@
 import axios from "axios";
-import { connectionGading } from "../config/Database.js";
+import { connectionRajabasa } from "../config/Database.js";
 import {
   filterPendapatanBulanan,
   getCurrentDateArray,
@@ -8,11 +8,11 @@ import {
 
 const port = 5555;
 const token = "wFcCXiNy1euYho73dBGwkPhjjTdODzv6";
-const namaKlinik = "Klinik Kosasih Rawat Inap Sumber Waras";
-const namaLab = "Laboratorium Sumber Waras";
+const namaKlinik = "Klinik Kosasih Rawap Inap Rajabasa";
+const namaLab = "Laboratorium Kosasih Rajabasa";
 const bulan = getCurrentDateArray("bulan");
 const tahun = getCurrentDateArray("tahun");
-const idCabang = [6, 5];
+const idCabang = [7, 8];
 
 export const getPendapatan = async (req, res) => {
   const idPendapatanBarangKlinik = 401.001;
@@ -53,16 +53,16 @@ export const getPendapatan = async (req, res) => {
       AND division IN ('1');`;
 
   try {
-    const [resultPendapatanBarangKlinik] = await connectionGading.query(
+    const [resultPendapatanBarangKlinik] = await connectionRajabasa.query(
       queryGetPendapatanBarangKlinik
     );
-    const [resultPendapatanJasaKlinik] = await connectionGading.query(
+    const [resultPendapatanJasaKlinik] = await connectionRajabasa.query(
       queryGetPendapatanJasaKlinik
     );
-    const [resultPendapatanBarangLab] = await connectionGading.query(
+    const [resultPendapatanBarangLab] = await connectionRajabasa.query(
       queryGetPendapatanBarangLab
     );
-    const [resultPendapatanJasaLab] = await connectionGading.query(
+    const [resultPendapatanJasaLab] = await connectionRajabasa.query(
       queryGetPendapatanJasaLab
     );
 
@@ -106,7 +106,7 @@ export const indexBulanan = async (req, res) => {
 };
 
 export const storeBulanan = async (req, res) => {
-  const response = await fetch(`http://localhost:${port}/gading/pendapatan`);
+  const response = await fetch(`http://localhost:${port}/rajabasa/pendapatan`);
   const dataResponse = await response.json();
 
   const omset = [
@@ -180,7 +180,7 @@ export const storeHarian = async (req, res) => {
   try {
     // Fetch omset data
     const responseOmset = await fetch(
-      `http://localhost:${port}/gading/pendapatan`
+      `http://localhost:${port}/rajabasa/pendapatan`
     );
     const dataResponseOmset = await responseOmset.json();
 
@@ -197,7 +197,7 @@ export const storeHarian = async (req, res) => {
 
     // Fetch bulanan data
     const response = await fetch(
-      `http://localhost:${port}/gading/pendapatan/bulanan`
+      `http://localhost:${port}/rajabasa/pendapatan/bulanan`
     );
     const dataResponse = await response.json();
 
@@ -229,7 +229,7 @@ export const storeHarian = async (req, res) => {
           "Content-Type": "application/json",
         },
         data: {
-          Id: `Penjualan Harian Gading`,
+          Id: `Penjualan Harian Rajabasa`,
           "Id Cabang": cabangId,
           "Id Penjualan Bulanan": idPenjualanBulanan[index],
           "Dari Tanggal": "2024-07-24",
@@ -255,17 +255,17 @@ export const storeHarian = async (req, res) => {
 export const run = async (req, res) => {
   try {
     const response = await fetch(
-      `http://localhost:${port}/gading/pendapatan/bulanan`
+      `http://localhost:${port}/rajabasa/pendapatan/bulanan`
     );
     const dataResponse = await response.json();
 
     if (Array.isArray(dataResponse) && dataResponse.length === 0) {
-      await fetch(`http://localhost:${port}/gading/pendapatan/bulanan/store`);
+      await fetch(`http://localhost:${port}/rajabasa/pendapatan/bulanan/store`);
     }
 
-    await fetch(`http://localhost:${port}/gading/pendapatan/harian/store`);
+    await fetch(`http://localhost:${port}/rajabasa/pendapatan/harian/store`);
 
-    await fetch(`http://localhost:${port}/gading/pendapatan/bulanan/update`);
+    await fetch(`http://localhost:${port}/rajabasa/pendapatan/bulanan/update`);
 
     res.json("Berhasil");
   } catch (error) {
