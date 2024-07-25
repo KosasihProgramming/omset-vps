@@ -134,15 +134,14 @@ export const storeBulanan = async (req, res) => {
       const data = {
         Judul: judul[i],
         "Id Cabang": [i + 1],
-        Tahun: tahun,
-        Bulan: bulan,
+        Tahun: 1,
+        Bulan: 1,
         "Tanggal Mulai": intervalBulanIni.tanggalMulai,
         "Tanggal Berakhir": intervalBulanIni.tanggalBerakhir,
         "Target Omset": 0,
         "Total Barang": 0,
         "Total Jasa": 0,
-        "Total Omset": 0,
-        "Persentase Capaian": 0,
+        "Total Omset": "0",
         "Created At": new Date().toISOString(),
       };
 
@@ -178,7 +177,6 @@ export const updateBulanan = async (req, res) => {
 
 export const storeHarian = async (req, res) => {
   try {
-    // Fetch omset data
     const responseOmset = await fetch(
       `http://localhost:${port}/kemiling/pendapatan`
     );
@@ -201,8 +199,20 @@ export const storeHarian = async (req, res) => {
     );
     const dataResponse = await response.json();
 
-    const idKlinik = dataResponse[0].id;
-    const idLab = dataResponse[1].id;
+    if (
+      !dataResponse ||
+      !Array.isArray(dataResponse) ||
+      dataResponse.length < 2
+    ) {
+      throw new Error("Data bulanan tidak sesuai atau kurang.");
+    }
+
+    const idKlinik = dataResponse[0]?.id;
+    const idLab = dataResponse[1]?.id;
+
+    if (!idKlinik || !idLab) {
+      throw new Error("ID Klinik atau ID Lab tidak ditemukan.");
+    }
 
     const idPenjualanBulanan = [idKlinik, idLab];
 
@@ -221,6 +231,21 @@ export const storeHarian = async (req, res) => {
         omset[index].pendapatanJasaKlinik || omset[index].pendapatanJasaLab;
       const totalOmset = penjualanBarang + penjualanJasa;
 
+      const dataToSend = {
+        Id: `Penjualan Harian Kemiling`,
+        "Id Cabang": cabangId,
+        "Id Penjualan Bulanan": idPenjualanBulanan[index],
+        "Dari Tanggal": "2024-07-24",
+        "Sampai Tanggal": "2024-07-24",
+        "Penjualan Barang": penjualanBarang.toString(),
+        "Penjualan Jasa": penjualanJasa.toString(),
+        Diskon: "0",
+        Omset: totalOmset,
+        "Created At": new Date().toISOString(),
+      };
+
+      console.log("Data yang dikirim:", dataToSend);
+
       return axios({
         method: "POST",
         url: "http://202.157.189.177:8080/api/database/rows/table/665/?user_field_names=true",
@@ -228,18 +253,7 @@ export const storeHarian = async (req, res) => {
           Authorization: `Token ${token}`,
           "Content-Type": "application/json",
         },
-        data: {
-          Id: `Penjualan Harian Kemiling`,
-          "Id Cabang": cabangId,
-          "Id Penjualan Bulanan": idPenjualanBulanan[index],
-          "Dari Tanggal": "2024-07-24",
-          "Sampai Tanggal": "2024-07-24",
-          "Penjualan Barang": penjualanBarang,
-          "Penjualan Jasa": penjualanJasa,
-          Diskon: "0",
-          Omset: totalOmset,
-          "Created At": new Date().toISOString(),
-        },
+        data: dataToSend,
       });
     });
 
@@ -276,5 +290,6 @@ export const run = async (req, res) => {
 // NB:
 /*
 Tolong perbaiki penjumlahannya, untuk logic alurnya sudah berhasil sih, jadi ga ada kendala
-yang kendala cuman waktu aja sih, huftt
+yang kendala cuman waktu aja sih,
+
 */

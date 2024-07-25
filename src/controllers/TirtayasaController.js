@@ -146,6 +146,8 @@ export const storeBulanan = async (req, res) => {
         "Created At": new Date().toISOString(),
       };
 
+      console.log(data);
+
       await axios({
         method: "POST",
         url: "http://202.157.189.177:8080/api/database/rows/table/663/?user_field_names=true",

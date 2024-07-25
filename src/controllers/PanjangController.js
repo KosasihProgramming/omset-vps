@@ -1,5 +1,5 @@
 import axios from "axios";
-import { connectionRajabasa } from "../config/Database.js";
+import { connectionPanjang } from "../config/Database.js";
 import {
   filterPendapatanBulanan,
   getCurrentDateArray,
@@ -8,11 +8,11 @@ import {
 
 const port = 5555;
 const token = "wFcCXiNy1euYho73dBGwkPhjjTdODzv6";
-const namaKlinik = "Klinik Kosasih Rawap Inap Rajabasa";
-const namaLab = "Laboratorium Kosasih Rajabasa";
+const namaKlinik = "Klinik Pratama Kosasih Panjang";
+// const namaLab = "Laboratorium Kosasih panjang";
 const bulan = getCurrentDateArray("bulan");
 const tahun = getCurrentDateArray("tahun");
-const idCabang = [7, 8];
+const idCabang = [18];
 
 export const getPendapatan = async (req, res) => {
   const idPendapatanBarangKlinik = 401.001;
@@ -53,24 +53,24 @@ export const getPendapatan = async (req, res) => {
       AND division IN ('1');`;
 
   try {
-    const [resultPendapatanBarangKlinik] = await connectionRajabasa.query(
+    const [resultPendapatanBarangKlinik] = await connectionPanjang.query(
       queryGetPendapatanBarangKlinik
     );
-    const [resultPendapatanJasaKlinik] = await connectionRajabasa.query(
+    const [resultPendapatanJasaKlinik] = await connectionPanjang.query(
       queryGetPendapatanJasaKlinik
     );
-    const [resultPendapatanBarangLab] = await connectionRajabasa.query(
+    const [resultPendapatanBarangLab] = await connectionPanjang.query(
       queryGetPendapatanBarangLab
     );
-    const [resultPendapatanJasaLab] = await connectionRajabasa.query(
+    const [resultPendapatanJasaLab] = await connectionPanjang.query(
       queryGetPendapatanJasaLab
     );
 
     const pendapatan = {
       barangKlinik: Math.abs(resultPendapatanBarangKlinik[0].balance) || 0,
       jasaKlinik: Math.abs(resultPendapatanJasaKlinik[0].balance) || 0,
-      barangLab: Math.abs(resultPendapatanBarangLab[0].balance) || 0,
-      jasaLab: Math.abs(resultPendapatanJasaLab[0].balance) || 0,
+      // barangLab: Math.abs(resultPendapatanBarangLab[0].balance) || 0,
+      // jasaLab: Math.abs(resultPendapatanJasaLab[0].balance) || 0,
     };
 
     res.json(pendapatan);
@@ -95,7 +95,7 @@ export const indexBulanan = async (req, res) => {
 
     const dataFiltered = filterPendapatanBulanan(data, [
       `Penjualan ${namaKlinik} ${bulan} ${tahun}`,
-      `Penjualan ${namaLab} ${bulan} ${tahun}`,
+      // `Penjualan ${namaLab} ${bulan} ${tahun}`,
     ]);
     res.json(dataFiltered);
   } catch (error) {
@@ -106,7 +106,7 @@ export const indexBulanan = async (req, res) => {
 };
 
 export const storeBulanan = async (req, res) => {
-  const response = await fetch(`http://localhost:${port}/rajabasa/pendapatan`);
+  const response = await fetch(`http://localhost:${port}/panjang/pendapatan`);
   const dataResponse = await response.json();
 
   const omset = [
@@ -114,17 +114,17 @@ export const storeBulanan = async (req, res) => {
       pendapatanBarangKlinik: dataResponse.barangKlinik,
       pendapatanJasaKlinik: dataResponse.jasaKlinik,
     },
-    {
-      pendapatanBarangLab: dataResponse.barangLab,
-      pendapatanJasaLab: dataResponse.jasaLab,
-    },
+    // {
+    //   pendapatanBarangLab: dataResponse.barangLab,
+    //   pendapatanJasaLab: dataResponse.jasaLab,
+    // },
   ];
 
   const bulan = getCurrentDateArray("bulan");
   const tahun = getCurrentDateArray("tahun");
   const judul = [
     `Penjualan ${namaKlinik} ${bulan} ${tahun}`,
-    `Penjualan ${namaLab} ${bulan} ${tahun}`,
+    // `Penjualan ${namaLab} ${bulan} ${tahun}`,
   ];
 
   const intervalBulanIni = getTanggalInterval(bulan, tahun);
@@ -133,7 +133,7 @@ export const storeBulanan = async (req, res) => {
     for (let i = 0; i < omset.length; i++) {
       const data = {
         Judul: judul[i],
-        "Id Cabang": [i + 1],
+        "Id Cabang": idCabang,
         Tahun: tahun,
         Bulan: bulan,
         "Tanggal Mulai": intervalBulanIni.tanggalMulai,
@@ -145,8 +145,6 @@ export const storeBulanan = async (req, res) => {
         "Persentase Capaian": 0,
         "Created At": new Date().toISOString(),
       };
-
-      console.log(data);
 
       await axios({
         method: "POST",
@@ -182,7 +180,7 @@ export const storeHarian = async (req, res) => {
   try {
     // Fetch omset data
     const responseOmset = await fetch(
-      `http://localhost:${port}/rajabasa/pendapatan`
+      `http://localhost:${port}/panjang/pendapatan`
     );
     const dataResponseOmset = await responseOmset.json();
 
@@ -191,22 +189,22 @@ export const storeHarian = async (req, res) => {
         pendapatanBarangKlinik: dataResponseOmset.barangKlinik,
         pendapatanJasaKlinik: dataResponseOmset.jasaKlinik,
       },
-      {
-        pendapatanBarangLab: dataResponseOmset.barangLab,
-        pendapatanJasaLab: dataResponseOmset.jasaLab,
-      },
+      // {
+      //   pendapatanBarangLab: dataResponseOmset.barangLab,
+      //   pendapatanJasaLab: dataResponseOmset.jasaLab,
+      // },
     ];
 
     // Fetch bulanan data
     const response = await fetch(
-      `http://localhost:${port}/rajabasa/pendapatan/bulanan`
+      `http://localhost:${port}/panjang/pendapatan/bulanan`
     );
     const dataResponse = await response.json();
 
     const idKlinik = dataResponse[0].id;
-    const idLab = dataResponse[1].id;
+    // const idLab = dataResponse[1].id;
 
-    const idPenjualanBulanan = [idKlinik, idLab];
+    const idPenjualanBulanan = [idKlinik];
 
     // Memastikan jumlah elemen di idCabang dan idPenjualanBulanan sama
     if (idCabang.length !== idPenjualanBulanan.length) {
@@ -217,10 +215,8 @@ export const storeHarian = async (req, res) => {
 
     // Menggunakan Promise.all untuk menunggu semua permintaan selesai
     const postPromises = idCabang.map((cabangId, index) => {
-      const penjualanBarang =
-        omset[index].pendapatanBarangKlinik || omset[index].pendapatanBarangLab;
-      const penjualanJasa =
-        omset[index].pendapatanJasaKlinik || omset[index].pendapatanJasaLab;
+      const penjualanBarang = omset[index].pendapatanBarangKlinik;
+      const penjualanJasa = omset[index].pendapatanJasaKlinik;
       const totalOmset = penjualanBarang + penjualanJasa;
 
       return axios({
@@ -231,7 +227,7 @@ export const storeHarian = async (req, res) => {
           "Content-Type": "application/json",
         },
         data: {
-          Id: `Penjualan Harian Rajabasa`,
+          Id: `Penjualan Harian panjang`,
           "Id Cabang": cabangId,
           "Id Penjualan Bulanan": idPenjualanBulanan[index],
           "Dari Tanggal": "2024-07-24",
@@ -256,18 +252,18 @@ export const storeHarian = async (req, res) => {
 
 export const run = async (req, res) => {
   try {
-    const response = await fetch(
-      `http://localhost:${port}/rajabasa/pendapatan/bulanan`
-    );
-    const dataResponse = await response.json();
+    // const response = await fetch(
+    //   `http://localhost:${port}/panjang/pendapatan/bulanan`
+    // );
+    // const dataResponse = await response.json();
 
-    if (Array.isArray(dataResponse) && dataResponse.length === 0) {
-      await fetch(`http://localhost:${port}/rajabasa/pendapatan/bulanan/store`);
-    }
+    // if (Array.isArray(dataResponse) && dataResponse.length === 0) {
+    //   await fetch(`http://localhost:${port}/panjang/pendapatan/bulanan/store`);
+    // }
 
-    await fetch(`http://localhost:${port}/rajabasa/pendapatan/harian/store`);
+    await fetch(`http://localhost:${port}/panjang/pendapatan/harian/store`);
 
-    await fetch(`http://localhost:${port}/rajabasa/pendapatan/bulanan/update`);
+    // await fetch(`http://localhost:${port}/panjang/pendapatan/bulanan/update`);
 
     res.json("Berhasil");
   } catch (error) {
